@@ -1,0 +1,436 @@
+﻿<Window x:Class="PlayingCardDesigner.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PlayingCardDesigner"
+        mc:Ignorable="d"
+        Title="PlayingCardDesigner"
+        WindowState="Maximized"
+        ResizeMode="CanMinimize"
+        KeyDown="Window_KeyDown"
+        FontFamily="Book Antiqua">
+    <DockPanel LastChildFill="True">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Datei">
+                <MenuItem Header="_Neu" Click="MenuItem_New_Click"/>
+                <MenuItem Header="_Öffnen" Click="MenuItem_Open_Click"/>
+                <Separator />
+                <MenuItem Header="_Speichern Strg+S" Name="MenutItem_Save" IsEnabled="false" Click="MenuItem_Save_Click"/>
+                <MenuItem Header="_Aktualisieren Strg+A" Name="MenutItem_Reload" IsEnabled="false" Click="MenuItem_Reload_Click"/>
+                <MenuItem Header="_Exportieren Strg+E" Name="MenutItem_Export" IsEnabled="false" Click="MenuItem_Export_Click"/>
+                <MenuItem Header="_Collage Strg+C" Name="MenutItem_Collage" IsEnabled="false" Click="MenuItem_Collage_Click"/>
+                <Separator />
+                <MenuItem Header="_Schließen" Click="MenuItem_Exit_Click"/>
+            </MenuItem>
+        </Menu>
+        <Label Name="LB_Statusbar" Background="WhiteSmoke" Padding="10" DockPanel.Dock="Bottom"/>
+        <DockPanel Name="DockPanel_Session" Background="WhiteSmoke" Visibility="Collapsed" LastChildFill="True">
+            <Grid Margin="20" DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="8*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Label Name="LB_Design_Name" Content="{Binding Session.SessionFileName}" FontSize="50" FontWeight="Bold" Grid.Column="0"/>
+                <Button Name="BTN_Edit_Name" Content="Bearbeiten" Click="BTN_Edit_Name_Click" Grid.Column="1"/>
+                <TextBox Name="TB_Design_Name" Text="{Binding Session.SessionFileName}" Visibility="Collapsed" Grid.Column="0" FontSize="24"/>
+                <Button Name="BTN_Save_Name" Content="Übernehmen" Click="BTN_Save_Name_Click" Visibility="Collapsed" Grid.Column="1"/>
+                <Button Name="BTN_Export" Content="Exportieren" Click="BTN_Export_Click" Grid.Column="2"/>
+                <Button Name="BTN_Collage" Content="Zusammenstellen" Click="BTN_Collage_Click" Grid.Column="3"/>
+            </Grid>
+            <StackPanel Name="StackPanel_Tools" Margin="10" DockPanel.Dock="Left">
+                <Label Content="Größe und Form" FontSize="18"/>
+                <Grid Name="Grid_Size">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Label Content="Größe" FontWeight="Bold" Grid.Row="0" Grid.Column="0"/>
+                    <Button Name="BTN_Edit_Size" Content="Bearbeiten" Click="BTN_Size_Edit_Click" Grid.Row="0" Grid.Column="1"/>
+                    <Button Name="BTN_Save_Size" Content="Übernehmen" Visibility="Collapsed" Click="BTN_Size_Save_Click" Grid.Row="0" Grid.Column="1"/>
+                    <Label Content="Breite (mm): " Grid.Row="1" Grid.Column="0"/>
+                    <Label Name="LB_Size_Width" Content="{Binding Session.Design.Background.Width}" Grid.Row="1" Grid.Column="1"/>
+                    <TextBox Name="TB_Size_Width" Text="{Binding Session.Design.Background.Width}" Visibility="Collapsed" Grid.Row="1" Grid.Column="1"/>
+                    <Label Content="Höhe (mm): " Grid.Row="2" Grid.Column="0"/>
+                    <Label Name="LB_Size_Height" Content="{Binding Session.Design.Background.Height}" Grid.Row="2" Grid.Column="1"/>
+                    <TextBox Name="TB_Size_Height" Text="{Binding Session.Design.Background.Height}" Visibility="Collapsed" Grid.Row="2" Grid.Column="1"/>
+                    <Label Content="Rundung (%): " Grid.Row="3" Grid.Column="0"/>
+                    <Label Name="LB_Size_CornerRadius" Content="{Binding Session.Design.Background.CornerRadius}" Grid.Row="3" Grid.Column="1"/>
+                    <TextBox Name="TB_Size_CornerRadius" Text="{Binding Session.Design.Background.CornerRadius}" Visibility="Collapsed" Grid.Row="3" Grid.Column="1"/>
+                    <Label Content="Hintergrundfarbe: " Grid.Row="4" Grid.Column="0"/>
+                    <Label Name="LB_Size_Fill" Content="{Binding Session.Design.Background.Fill}" Grid.Row="4" Grid.Column="1"/>
+                    <ComboBox Name="CB_Size_Fill" ItemsSource="{Binding ColorPalette}" Visibility="Collapsed" Grid.Row="4" Grid.Column="1"/>
+                </Grid>
+                <Label Content="Farben" FontSize="18"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Name="TB_Add_Color" Width="100"/>
+                    <Button Name="BTN_Add_Color" Content="Hinzufügen" Click="BTN_Add_Color_Click"/>
+                </StackPanel>
+                <ScrollViewer Height="150" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl Name="ItemsControl_Colors" ItemsSource="{Binding Session.Design.Colors}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border BorderBrush="Gray" BorderThickness="1" Width="350">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="3*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="2*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Label Content="{Binding }" Grid.Column="0"/>
+                                            <Rectangle Fill="{Binding }" RadiusX="30" RadiusY="30" Height="15" Width="15" Grid.Column="1"/>
+                                            <Button ToolTip="{Binding }" Content="Entfernen" Click="BTN_Delete_Color_Click" Grid.Column="2"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Rectangle HorizontalAlignment="Stretch" Fill="Black" Height="2" Margin="0,10,0,0"/>
+                <Label Content="Datenkontext" FontSize="18" Margin="0,0,0,-10"/>
+                <Grid Name="Grid_DataContext">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Label Content="Anzahl Zeilen: " Grid.Row="0" Grid.Column="0"/>
+                    <Label Content="{Binding Session.Design.Daten.Rows.Count}" Grid.Row="0" Grid.Column="1"/>
+                    <Button Name="BTN_Import_DataContext" Content="Importieren" Click="BTN_Import_DataContext_Click" Grid.Row="0" Grid.Column="2"/>
+                    <ScrollViewer Height="200" MaxWidth="400" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                        <DataGrid ItemsSource="{Binding Session.Design.Daten}"/>
+                    </ScrollViewer>
+                </Grid>
+            </StackPanel>
+            <StackPanel Margin="10" DockPanel.Dock="Right">
+                <Label Content="Elemente" FontSize="18"/>
+                <Button Name="BTN_UnselectAll_Elemente" Content="Auswahl aufheben" Click="BTN_UnselectAll_Elemente_Click"/>
+                <ScrollViewer Height="700" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl Name="ItemsControl_Elemente" ItemsSource="{Binding Session.Design.Elemente}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Border BorderBrush="Gray" BorderThickness="1" Width="350">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*" />
+                                                <ColumnDefinition Width="1*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+                                                <CheckBox IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
+                                                <Label Content="{Binding Name}" FontWeight="Bold"/>
+                                            </StackPanel>
+                                            <Label Content="{Binding SizeAndLocation}" FontWeight="Bold" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,10,0" Grid.Row="1" Grid.Column="1">
+                                                <Label Content="{Binding BorderThickness}" ContentStringFormat="{}B({0}): " FontWeight="Bold"/>
+                                                <Rectangle Fill="{Binding BorderColor}" StrokeThickness="1" Stroke="Black" RadiusX="30" RadiusY="30" Height="15" Width="15"/>
+                                                <Label Content="F:" FontWeight="Bold"/>
+                                                <Rectangle Fill="{Binding Fill}" StrokeThickness="1" Stroke="Black" RadiusX="30" RadiusY="30" Height="15" Width="15"/>
+                                            </StackPanel>
+                                            <Button ToolTip="{Binding}" Content="Bearbeiten" Click="BTN_Edit_Element_Click" Grid.Row="2" Grid.Column="0"/>
+                                            <Button ToolTip="{Binding}" Content="Entfernen" Click="BTN_Delete_Element_Click" Grid.Row="2" Grid.Column="1"/>
+                                            <Button ToolTip="{Binding}" Content="Hoch" Click="BTN_MoveUp_Element_Click" Grid.Row="3" Grid.Column="0"/>
+                                            <Button ToolTip="{Binding}" Content="Runter" Click="BTN_MoveDown_Element_Click" Grid.Row="3" Grid.Column="1"/>
+                                            <Button ToolTip="{Binding}" Content="Erstes" Click="BTN_MoveTop_Element_Click" Grid.Row="4" Grid.Column="0"/>
+                                            <Button ToolTip="{Binding}" Content="Letztes" Click="BTN_MoveBottom_Element_Click" Grid.Row="4" Grid.Column="1"/>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+            <StackPanel Margin="10" Width="400" DockPanel.Dock="Right">
+                <Label Content="Erstellen und bearbeiten" FontSize="18"/>
+                <Button Name="BTN_Add_Rectangle" Content="Rechteck hinzufügen" Click="BTN_Add_Rectangle_Click"/>
+                <Grid Name="Grid_AddRectangle" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Name: " Grid.Row="0" Grid.Column="0"/>
+                    <TextBox Name="TB_Rectangle_Name" Grid.Row="0" Grid.Column="1"/>
+                    <Label Content="Height: " Grid.Row="1" Grid.Column="0"/>
+                    <TextBox Name="TB_Rectangle_Height" Grid.Row="1" Grid.Column="1"/>
+                    <Label Content="Width: " Grid.Row="1" Grid.Column="2"/>
+                    <TextBox Name="TB_Rectangle_Width" Grid.Row="1" Grid.Column="3"/>
+                    <Label Content="Y: " Grid.Row="2" Grid.Column="0"/>
+                    <TextBox Name="TB_Rectangle_Y" Grid.Row="2" Grid.Column="1"/>
+                    <Label Content="X: " Grid.Row="2" Grid.Column="2"/>
+                    <TextBox Name="TB_Rectangle_X" Grid.Row="2" Grid.Column="3"/>
+                    <Label Content="Farbe: " Grid.Row="3" Grid.Column="0"/>
+                    <ComboBox Name="CB_Rectangle_Fill" ItemsSource="{Binding ColorPalette}" Grid.Row="3" Grid.Column="1"/>
+                    <Label Content="Rahmenbreite: " Grid.Row="3" Grid.Column="2"/>
+                    <TextBox Name="TB_Rectangle_BorderThickness" Text="0" Grid.Row="3" Grid.Column="3"/>
+                    <Label Content="Rahmenfarbe: " Grid.Row="4" Grid.Column="0"/>
+                    <ComboBox Name="CB_Rectangle_BorderColor" ItemsSource="{Binding ColorPalette}" Grid.Row="4" Grid.Column="1"/>
+                    <Label Content="Rahmenrundung: " Grid.Row="4" Grid.Column="2"/>
+                    <TextBox Name="TB_Rectangle_CornerRadius" Grid.Row="4" Grid.Column="3"/>
+                    <Label Content="Kontext (Auswahl): " Grid.Row="5" Grid.Column="0"/>
+                    <ComboBox Name="CB_Rectangle_DataContext" ItemsSource="{Binding Session.Design.Kontexte}" Grid.Row="5" Grid.Column="1"/>
+                    <Label Content="Kontext (Freitext): " Grid.Row="5" Grid.Column="2"/>
+                    <TextBox Name="TB_Rectangle_DataContext" Grid.Row="5" Grid.Column="3"/>
+                    <Label Content="Textgröße: " Grid.Row="6" Grid.Column="0"/>
+                    <TextBox Name="TB_Rectangle_Fontsize" Grid.Row="6" Grid.Column="1"/>
+                    <RadioButton Name="RB_Rectangle_Top" GroupName="Order" IsChecked="True" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2">
+                        Oben einfügen
+                    </RadioButton>
+                    <RadioButton Name="RB_Rectangle_Bottom" GroupName="Order" Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="2">
+                        Unten einfügen
+                    </RadioButton>
+                    <Button Name="BTN_Create_Rectangle" Content="Hinzufügen" Click="BTN_Create_Rectangle_Click" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Save_Rectangle" Content="Übernehmen" Visibility="Collapsed" Click="BTN_Save_Rectangle_Click" Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Cancel_Save_Rectangle" Content="Abbrechen" Click="BTN_Cancel_Save_Rectangle_Click" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="2"/>
+                </Grid>
+                <Button Name="BTN_Add_Circle" Content="Kreis hinzufügen" Click="BTN_Add_Circle_Click"/>
+                <Grid Name="Grid_AddCircle" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Name: " Grid.Row="0" Grid.Column="0"/>
+                    <TextBox Name="TB_Circle_Name" Grid.Row="0" Grid.Column="1"/>
+                    <Label Content="Height: " Grid.Row="1" Grid.Column="0"/>
+                    <TextBox Name="TB_Circle_Height" Grid.Row="1" Grid.Column="1"/>
+                    <Label Content="Width: " Grid.Row="1" Grid.Column="2"/>
+                    <TextBox Name="TB_Circle_Width" Grid.Row="1" Grid.Column="3"/>
+                    <Label Content="Y: " Grid.Row="2" Grid.Column="0"/>
+                    <TextBox Name="TB_Circle_Y" Grid.Row="2" Grid.Column="1"/>
+                    <Label Content="X: " Grid.Row="2" Grid.Column="2"/>
+                    <TextBox Name="TB_Circle_X" Grid.Row="2" Grid.Column="3"/>
+                    <Label Content="Farbe: " Grid.Row="3" Grid.Column="0"/>
+                    <ComboBox Name="CB_Circle_Fill" ItemsSource="{Binding ColorPalette}" Grid.Row="3" Grid.Column="1"/>
+                    <Label Content="Rahmenbreite: " Grid.Row="3" Grid.Column="2"/>
+                    <TextBox Name="TB_Circle_BorderThickness" Text="0" Grid.Row="3" Grid.Column="3"/>
+                    <Label Content="Rahmenfarbe: " Grid.Row="4" Grid.Column="0"/>
+                    <ComboBox Name="CB_Circle_BorderColor" ItemsSource="{Binding ColorPalette}" Grid.Row="4" Grid.Column="1"/>
+                    <Label Content="Kontext (Auswahl): " Grid.Row="4" Grid.Column="2"/>
+                    <ComboBox Name="CB_Circle_DataContext" ItemsSource="{Binding Session.Design.Kontexte}" Grid.Row="4" Grid.Column="3"/>
+                    <Label Content="Kontext (Freitext): " Grid.Row="5" Grid.Column="0"/>
+                    <TextBox Name="TB_Circle_DataContext" Grid.Row="5" Grid.Column="1"/>
+                    <Label Content="Textgröße: " Grid.Row="5" Grid.Column="2"/>
+                    <TextBox Name="TB_Circle_Fontsize" Grid.Row="5" Grid.Column="3"/>
+                    <RadioButton Name="RB_Circle_Top" GroupName="Order" IsChecked="True" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+                        Oben einfügen
+                    </RadioButton>
+                    <RadioButton Name="RB_Circle_Bottom" GroupName="Order" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="2">
+                        Unten einfügen
+                    </RadioButton>
+                    <Button Name="BTN_Create_Circle" Content="Hinzufügen" Click="BTN_Create_Circle_Click" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Save_Circle" Content="Übernehmen" Visibility="Collapsed" Click="BTN_Save_Circle_Click" Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Cancel_Save_Circle" Content="Abbrechen" Click="BTN_Cancel_Save_Circle_Click" Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="2"/>
+                </Grid>
+                <Button Name="BTN_Add_Icon" Content="Bild hinzufügen" Click="BTN_Add_Icon_Click"/>
+                <Grid Name="Grid_AddIcon" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Name: " Grid.Row="0" Grid.Column="0"/>
+                    <TextBox Name="TB_Icon_Name" Grid.Row="0" Grid.Column="1"/>
+                    <Label Content="Height: " Grid.Row="1" Grid.Column="0"/>
+                    <TextBox Name="TB_Icon_Height" Grid.Row="1" Grid.Column="1"/>
+                    <Label Content="Width: " Grid.Row="1" Grid.Column="2"/>
+                    <TextBox Name="TB_Icon_Width" Grid.Row="1" Grid.Column="3"/>
+                    <Label Content="Y: " Grid.Row="2" Grid.Column="0"/>
+                    <TextBox Name="TB_Icon_Y" Grid.Row="2" Grid.Column="1"/>
+                    <Label Content="X: " Grid.Row="2" Grid.Column="2"/>
+                    <TextBox Name="TB_Icon_X" Grid.Row="2" Grid.Column="3"/>
+                    <Label Content="Dateiname: " Grid.Row="3" Grid.Column="0"/>
+                    <TextBox Name="TB_Icon_FileName" Grid.Row="3" Grid.Column="1"/>
+                    <Label Content="Kontext (Auswahl): " Grid.Row="3" Grid.Column="2"/>
+                    <ComboBox Name="CB_Icon_Datacontext" ItemsSource="{Binding Session.Design.Kontexte}" Grid.Row="3" Grid.Column="3"/>
+                    <RadioButton Name="RB_Icon_Top" IsChecked="True" GroupName="Order" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2">
+                        Oben einfügen
+                    </RadioButton>
+                    <RadioButton Name="RB_Icon_Bottom" GroupName="Order" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2">
+                        Unten einfügen
+                    </RadioButton>
+                    <Button Name="BTN_Create_Icon" Content="Hinzufügen" Click="BTN_Create_Icon_Click" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Save_Icon" Content="Übernehmen" Visibility="Collapsed" Click="BTN_Save_Icon_Click" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Cancel_Save_Icon" Content="Abbrechen" Click="BTN_Cancel_Save_Icon_Click" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2"/>
+                </Grid>
+                <Button Name="BTN_Add_Table" Content="Tabelle hinzufügen" Click="BTN_Add_Table_Click"/>
+                <Grid Name="Grid_AddTable" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Height: " Grid.Row="0" Grid.Column="0"/>
+                    <TextBox Name="TB_Table_Height" Grid.Row="0" Grid.Column="1"/>
+                    <Label Content="Width: " Grid.Row="0" Grid.Column="2"/>
+                    <TextBox Name="TB_Table_Width" Grid.Row="0" Grid.Column="3"/>
+                    <Label Content="Y: " Grid.Row="1" Grid.Column="0"/>
+                    <TextBox Name="TB_Table_Y" Grid.Row="1" Grid.Column="1"/>
+                    <Label Content="X: " Grid.Row="1" Grid.Column="2"/>
+                    <TextBox Name="TB_Table_X" Grid.Row="1" Grid.Column="3"/>
+                    <RadioButton Name="RB_Table_Top" IsChecked="True" GroupName="Order" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                        Oben einfügen
+                    </RadioButton>
+                    <RadioButton Name="RB_Table_Bottom" GroupName="Order" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2">
+                        Unten einfügen
+                    </RadioButton>
+                    <Button Name="BTN_Create_Table" Content="Hinzufügen" Click="BTN_Create_Table_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Save_Table" Content="Übernehmen" Visibility="Collapsed" Click="BTN_Save_Table_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
+                    <Button Name="BTN_Cancel_Save_Table" Content="Abbrechen" Click="BTN_Cancel_Save_Table_Click" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2"/>
+                </Grid>
+                <Rectangle HorizontalAlignment="Stretch" Fill="Black" Height="2" Margin="0,10,0,0"/>
+                <Label Content="Ausrichten" FontSize="18"/>
+                <Grid Name="Grid_Aligning">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Richte Element " Grid.Row="0" Grid.Column="0"/>
+                    <ComboBox Name="CB_Element1" ItemsSource="{Binding ElementList}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"/>
+                    <Label Content="an " Grid.Row="0" Grid.Column="3"/>
+                    <Label Content="Element " Grid.Row="1" Grid.Column="0"/>
+                    <ComboBox Name="CB_Element2" ItemsSource="{Binding ElementList}" Grid.Row="1" Grid.Column="1"  Grid.ColumnSpan="2"/>
+                    <Label Content="aus" Grid.Row="1" Grid.Column="3"/>
+                    <RadioButton Name="RB_Align_Left" GroupName="Align1" Grid.Row="2" Grid.Column="0">
+                        Links
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_Horizontal" GroupName="Align1" Grid.Row="2" Grid.Column="1">
+                        Horizontal
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_Right" GroupName="Align1" Grid.Row="2" Grid.Column="2">
+                        Rechts
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_None1" GroupName="Align1" Grid.Row="2" Grid.Column="3">
+                        KA
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_Top" GroupName="Align2" Grid.Row="3" Grid.Column="0">
+                        Oben
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_Vertical" GroupName="Align2" Grid.Row="3" Grid.Column="1">
+                        Vertikal
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_Bottom" GroupName="Align2" Grid.Row="3" Grid.Column="2">
+                        Unten
+                    </RadioButton>
+                    <RadioButton Name="RB_Align_None2" GroupName="Align2" Grid.Row="3" Grid.Column="3">
+                        KA
+                    </RadioButton>
+                    <Button Content="Übernehmen" Click="BTN_Element_AlignTo_Click" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"/>
+                </Grid>
+                <Rectangle HorizontalAlignment="Stretch" Fill="Black" Height="2" Margin="0,10,0,0"/>
+                <Label Content="Verschieben" FontSize="18"/>
+                <Grid Name="Grid_Moving">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBox Name ="TB_Move_Amount" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"/>
+                    <RadioButton Name="RB_Move_Up" GroupName="Move" Grid.Row="0" Grid.Column="1">
+                        Nach oben
+                    </RadioButton>
+                    <RadioButton Name="RB_Move_Down" GroupName="Move" Grid.Row="0" Grid.Column="2">
+                        Nach unten
+                    </RadioButton>
+                    <RadioButton Name="RB_Move_Left" GroupName="Move" Grid.Row="1" Grid.Column="1">
+                        Nach links
+                    </RadioButton>
+                    <RadioButton Name="RB_Move_Right" GroupName="Move" Grid.Row="1" Grid.Column="2">
+                        Nach rechts
+                    </RadioButton>
+                    <Button Name="BTN_Move_Elements" Content="Verschieben" Click="BTN_Move_Elements_Click" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"/>
+                </Grid>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Background="White" HorizontalAlignment="Center">
+                <Button Name="BTN_Render_Example" Content="Beispiel erstellen" Click="BTN_Render_Example_Click"/>
+                <ScrollViewer Height="800" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Orientation="Vertical">
+                        <Canvas Name="Canvas_Design" Width="{Binding Session.Design.Width}" Height="{Binding Session.Design.Height}" Background="White" Margin="50"/>
+                        <Canvas Name="Canvas_Export" Width="{Binding Session.Design.Width}" Height="{Binding Session.Design.Height}" Background="White" Visibility="Collapsed" Margin="50,0,50,50"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </StackPanel>
+        </DockPanel>
+    </DockPanel>
+</Window>
